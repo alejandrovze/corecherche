@@ -8,7 +8,7 @@ const bibFillEvent = new CustomEvent("bibFill", {
 const bibliography = document.getElementById("bibliography");
 
 async function loadSub(journalNumber) {
-    const response = await fetch(`./tentatives/ateliers/atelier-v${journalNumber}.html`);
+    const response = await fetch(`./tentatives/journal/journal-${journalNumber}.html`);
     const journal = await response.text();
 
     document.getElementById("journal-text").innerHTML = journal;
