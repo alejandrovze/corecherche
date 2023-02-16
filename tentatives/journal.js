@@ -24,4 +24,3 @@ buttons.forEach(button => {
   });
 });
 
-loadSub("1");
