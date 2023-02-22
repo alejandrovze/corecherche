@@ -4,7 +4,6 @@ from bokeh.layouts import column, row
 from bokeh.models import ColumnDataSource, CustomJS, Slider, Div, Button, Paragraph
 from bokeh.plotting import figure, output_file, show, curdoc
 from bokeh import events
-import numpy as np
 from bokeh.themes import built_in_themes, Theme
 from bokeh.io import curdoc
 from pydub import AudioSegment
