@@ -8,16 +8,43 @@ from bokeh.themes import built_in_themes, Theme
 from bokeh.io import curdoc
 from pydub import AudioSegment
 from pydub.playback import play
-
+from pydub.silence import split_on_silence
+import librosa
+import numpy as np
+import math
+# PLAY WITH A NEW SONG 
+splitNewSong = False
+######################
 
 
 output_file("contrast.html")
 #curdoc().theme = 'contrast'
 curdoc().theme = Theme(filename="myapp/theme.yaml")
-#song = AudioSegment.from_wav("music1.wav")
+
+audioAdress = 'myapp/static/data/'
+
+if splitNewSong:
+    audioAdress = 'myapp/static/split/'
+    song = AudioSegment.from_wav("myapp/static/music.wav")
+    # spliting audio files
+    audio_chunks = split_on_silence(song, min_silence_len=500, silence_thresh=-40 )
+    #loop is used to iterate over the output list
+    twodtable = ['Filename', 'FondFreq', 'Amplitude']
+    for i, chunk in enumerate(audio_chunks):
+        output_file = audioAdress+ "chunk{0}.wav".format(i)
+        print("Exporting file", output_file)
+        chunk.export(output_file, format="wav")
+        y, sr = librosa.load(output_file)
+        f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
+        
+        blockLinearRms= np.sqrt(np.mean(y**2)) # Linear value between 0 -> 1
+        blockLogRms = 20 * math.log10(blockLinearRms) # Decibel (dB value) between 0 dB -> -inf dB
+        twodtable.append(["chunk{0}.wav", f0, blockLogRms])
+        np.savetxt('scores_combined.txt', twodtable)
+        
 
 import pandas as pd
-dataFile = pd.read_csv('myapp/static/data/scores_combined.txt', sep="\t")
+dataFile = pd.read_csv(audioAdress + 'scores_combined.txt', sep="\t")
 nameSound = dataFile.to_numpy()[:, 0]
 x = dataFile.to_numpy()[:, 1]
 y = dataFile.to_numpy()[:, 2]
@@ -27,22 +54,6 @@ color= ["red"]*len(x)
 
 source2 = ColumnDataSource(data=dict(x=x, y=y, color=color, state=state, nameSound=nameSound))
 source = ColumnDataSource({'x0': [], 'y0': [], 'x1': [], 'y1': []})
-
-def display_event(div, attributes=[], style = 'float:left;clear:left;font_size=13px'):
-    "Build a suitable CustomJS to display the current event in the div model."
-    return CustomJS(args=dict(div=div), code="""
-        const attrs = %s;
-        const args = [];
-        for (let i = 0; i<attrs.length; i++) {
-            args.push(attrs[i] + '=' + Number(cb_obj[attrs[i]]).toFixed(2));
-        }
-        const line = "<span style=%r><b>" + cb_obj.event_name + "</b>(" + args.join(", ") + ")</span>\\n";
-        const text = div.text.concat(line);
-        const lines = text.split("\\n")
-        if (lines.length > 35)
-            lines.shift();
-        div.text = lines.join("\\n");
-    """ % (attributes, style))
 
 
 
@@ -238,9 +249,7 @@ def callback2(event):
         source2.state[el] = "True"
         play(song)
         print("YOOO")
-        
-def callback3(event):
-    print("Yoooo")
+
         
 #p.on_event(events.MouseMove, callback3)
 p.js_on_event(events.MouseMove, callback)
@@ -252,8 +261,6 @@ show(layout)
 #from bokeh.resources import CDN
 #import json
 #item_text = json.dumps(json_item(layout, "myplot"))
-
-
 
 
 curdoc().add_root(layout)

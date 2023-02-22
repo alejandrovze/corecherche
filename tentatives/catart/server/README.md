@@ -2,11 +2,7 @@
 
 Requirements:
 
-pip install bokeh
-
-Or
-
-conda install bokeh
+pip install bokeh pydub librosa
 
 Run in 'server' folder: 
 
