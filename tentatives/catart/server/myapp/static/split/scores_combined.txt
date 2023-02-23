@@ -1,0 +1,2 @@
+Filename	FondFreq	Amplitude
+chunk0.wav	1	-19.805000737637968

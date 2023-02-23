@@ -13,7 +13,7 @@ import librosa
 import numpy as np
 import math
 # PLAY WITH A NEW SONG 
-splitNewSong = False
+splitNewSong = True
 ######################
 
 
@@ -27,20 +27,21 @@ if splitNewSong:
     audioAdress = 'myapp/static/split/'
     song = AudioSegment.from_wav("myapp/static/music.wav")
     # spliting audio files
-    audio_chunks = split_on_silence(song, min_silence_len=500, silence_thresh=-40 )
+    audio_chunks = split_on_silence(song, min_silence_len=10, silence_thresh=-10 )
     #loop is used to iterate over the output list
-    twodtable = ['Filename', 'FondFreq', 'Amplitude']
+    twodtable = [np.array(['Filename', 'FondFreq', 'Amplitude'])]
     for i, chunk in enumerate(audio_chunks):
         output_file = audioAdress+ "chunk{0}.wav".format(i)
         print("Exporting file", output_file)
         chunk.export(output_file, format="wav")
+        
         y, sr = librosa.load(output_file)
         f0, voiced_flag, voiced_probs = librosa.pyin(y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7'))
         
         blockLinearRms= np.sqrt(np.mean(y**2)) # Linear value between 0 -> 1
         blockLogRms = 20 * math.log10(blockLinearRms) # Decibel (dB value) between 0 dB -> -inf dB
-        twodtable.append(["chunk{0}.wav", f0, blockLogRms])
-        np.savetxt('scores_combined.txt', twodtable)
+        twodtable.append(np.array(["chunk{0}.wav".format(i), 1, blockLogRms]))
+    np.savetxt(audioAdress + 'scores_combined.txt', np.array(twodtable),fmt='%s', delimiter = "\t")
         
 
 import pandas as pd
@@ -104,7 +105,6 @@ glyph.line_color = "#ED553B"
 glyph.line_width = 2
 
 
-varSong = 10
 
 
 point_attributes = ['x', 'y', 'sx', 'sy'] 
@@ -127,6 +127,9 @@ var localMini = Number.MAX_SAFE_INTEGER;
 var finalX = 0;
 var finalY = 0;
 var audioID = Number.MAX_SAFE_INTEGER;
+
+const addr = audioAdresse
+console.log(addr)
 
 const lenValue = len.value;
 const volslider = vol_slider.value;
@@ -194,7 +197,7 @@ if (dataCercle.state[audioID] == "False" && dataCercle.color[audioID]=='#D2CC1A'
         peak: lpslider2
     });
     
-    const player = new Pz.Sound('myapp/static/data/'+ dataCercle.nameSound[audioID], () => {
+    const player = new Pz.Sound(addr + dataCercle.nameSound[audioID], () => {
       player.addEffect(delay);
       player.addEffect(distortion);
       player.addEffect(reverb);
@@ -219,7 +222,6 @@ data['y0'].push(y_cursor);
 data['x1'].push(finalX);
 data['y1'].push(finalY);
 
-varSong = audioID;
 source2.change.emit();
 segment.data = data;
 """ % point_attributes
@@ -227,7 +229,7 @@ segment.data = data;
 
 #p.js_on_event(events.MouseMove, display_event(div, attributes=point_attributes))
 
-callback = CustomJS(args={'circle': cr.data_source, 'segment': sr.data_source, "div": div, 'varSong':varSong, 'source2':source2,
+callback = CustomJS(args={'circle': cr.data_source, 'segment': sr.data_source, "div": div,  'source2':source2, 'audioAdresse':audioAdress,
 'len':len_slider,
 'vol_slider':vol_slider,
 'delay_slider1':delay_slider1,
