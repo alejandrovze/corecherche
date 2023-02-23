@@ -1,4 +1,4 @@
-console.log("loading catart ...");
+console.log("loading outils ...");
 
 // BIBLIOGRAPHY FILLER
 const bibFillEvent = new CustomEvent("bibFill", {
