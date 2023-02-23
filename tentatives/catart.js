@@ -7,21 +7,21 @@ const bibFillEvent = new CustomEvent("bibFill", {
 });
 const bibliography = document.getElementById("bibliography");
 
-async function loadSub(journalNumber) {
-    const response = await fetch(`./tentatives/ateliers/atelier-v${journalNumber}.html`);
-    const journal = await response.text();
+// async function loadSub(journalNumber) {
+//     const response = await fetch(`./tentatives/ateliers/atelier-v${journalNumber}.html`);
+//     const journal = await response.text();
 
-    document.getElementById("journal-text").innerHTML = journal;
+//     document.getElementById("journal-text").innerHTML = journal;
 
-    bibliography.dispatchEvent(bibFillEvent);
-}
+//     bibliography.dispatchEvent(bibFillEvent);
+// }
 
-const buttons = document.querySelectorAll('.subsection-button');
+// const buttons = document.querySelectorAll('.subsection-button');
 
-buttons.forEach(button => {
-  button.addEventListener('click', function handleClick(event) {
-    loadSub(button.getAttribute('journal-number'));
-  });
-});
+// buttons.forEach(button => {
+//   button.addEventListener('click', function handleClick(event) {
+//     loadSub(button.getAttribute('journal-number'));
+//   });
+// });
 
-loadSub("1");
+// loadSub("1");
