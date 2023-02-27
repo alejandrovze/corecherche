@@ -18,7 +18,8 @@ import pandas as pd
 import base64
 import io
 from bokeh.models.widgets import FileInput
-
+import os
+import time
 # PLAY WITH A NEW SONG 
 splitNewSong = True
 ######################
@@ -27,12 +28,11 @@ splitNewSong = True
 output_file("contrast.html")
 #curdoc().theme = 'contrast'
 curdoc().theme = Theme(filename="myapp/theme.yaml")
-
 audioAdress = 'myapp/static/data/'
-
 win_s = 4096
 hop_s = 512
 tolerance = 0.8
+
 
 class SplitWavAudioMubin():
     def __init__(self, folder, filename, finalFolder):
@@ -50,7 +50,8 @@ class SplitWavAudioMubin():
         t1 = from_min  * 1000
         t2 = to_min  * 1000
         split_audio = self.audio[t1:t2]
-        split_audio.export(self.finalFolder + split_filename, format="wav")
+        #os.remove(self.finalFolder + file_changment + split_filename)
+        split_audio.export(self.finalFolder +split_filename, format="wav")
         
     def multiple_split(self, sec_per_split):
         total_mins = math.ceil(self.get_duration())
@@ -60,10 +61,7 @@ class SplitWavAudioMubin():
             self.single_split(i, i+sec_per_split, split_fn)
             print(str(i) + ' Done')
             if i == total_mins - sec_per_split:
-                print('All splited successfully')
-
-
-                
+                print('All splited successfully')      
                 
 if splitNewSong:
     audioAdress = 'myapp/static/split/'
@@ -82,7 +80,6 @@ if splitNewSong:
         twodtable.append(np.array([segSound, meanCentroid, meanRMS]))
     np.savetxt(audioAdress + 'scores_combined.txt', np.array(twodtable),fmt='%s', delimiter = "\t")
         
-
 def set_carto(adresse):
     split_wav = SplitWavAudioMubin(audioAdress, adresse, audioAdress)
     split_wav.multiple_split(sec_per_split=1)
@@ -99,7 +96,10 @@ def set_carto(adresse):
         twodtable.append(np.array([segSound, meanCentroid, meanRMS]))
     np.savetxt(audioAdress + 'scores_combined.txt', np.array(twodtable),fmt='%s', delimiter = "\t")
     
-        
+
+file_input = FileInput(accept="audio")
+
+    
 dataFile = pd.read_csv(audioAdress + 'scores_combined.txt', sep="\t")
 nameSound = dataFile.to_numpy()[:, 0]
 x = dataFile.to_numpy()[:, 1]
@@ -108,11 +108,13 @@ state = ["False"]*len(x)
 color= ["red"]*len(x)
 
 def upload_song(attr,old,new):
+    mytime = time.time()
     decoded = base64.b64decode(new)
-    wav_file = open(audioAdress+ 'temp.wav', "wb")
+    #os.remove(audioAdress+ 'temp.wav')
+    wav_file = open(audioAdress + str(mytime) +'temp.wav', "wb")
     wav_file.write(decoded)
     
-    set_carto('temp.wav')
+    set_carto(str(mytime)+'temp.wav')
     
     dataFile = pd.read_csv(audioAdress + 'scores_combined.txt', sep="\t")
     nameSound = dataFile.to_numpy()[:, 0]
@@ -120,27 +122,21 @@ def upload_song(attr,old,new):
     y = dataFile.to_numpy()[:, 2]
     state = ["False"]*len(x)
     color= ["red"]*len(x)
-        
-    source2.data = dict(x=x, y=y, color=color, state=state, nameSound=nameSound)
+    source2.data = {'x':[], 'y':[], 'color':[], 'state':[], 'nameSound':[]}
+    source2.data = {'x':x, 'y':y, 'color':color, 'state':state, 'nameSound':nameSound}  
     
-    
-
 file_input = FileInput(accept="audio")
 file_input.on_change('value', upload_song)
 
-source2 = ColumnDataSource(data=dict(x=x, y=y, color=color, state=state, nameSound=nameSound))
+source2 = ColumnDataSource(data={'x':x, 'y':y, 'color':color, 'state':state, 'nameSound':nameSound})
 source = ColumnDataSource({'x0': [], 'y0': [], 'x1': [], 'y1': []})
-
-
 
 p = figure(width=1050, height=750, tools="pan,wheel_zoom,zoom_in,zoom_out,reset", title='PyTart (beta)')
 
 p.xaxis.major_tick_line_color = None  # turn off x-axis major ticks
 p.xaxis.minor_tick_line_color = None  # turn off x-axis minor ticks
-
 p.yaxis.major_tick_line_color = None  # turn off y-axis major ticks
 p.yaxis.minor_tick_line_color = None  # turn off y-axis minor ticks
-
 p.xaxis.major_label_text_font_size = '0pt'  # turn off x-axis tick labels
 p.yaxis.major_label_text_font_size = '0pt'  # turn off y-axis tick labels
 
@@ -162,8 +158,6 @@ paraLp = Div(text="""<b>Low-pass filter</b>""", height=20, align="center")
 lp_slider1 = Slider(start=10, end=22050, value=22000, step=1, title="Frequency")
 lp_slider2 = Slider(start=0.01, end=50, value=10, step=0.01, title="Peak")
 
-
-
 div = Div(width=400, height=p.height, height_policy="fixed")
 button = Button(label="Button", button_type="success")
 layout = row(p, column(file_input, vol_slider,len_slider,paraDelay,delay_slider1,delay_slider2,delay_slider3,paraPBrate,PBrate_slider1,paraRev,rev_slider1,rev_slider2,paraTrem,trem_slider1,trem_slider2,paraLp,lp_slider1))
@@ -171,19 +165,14 @@ layout = row(p, column(file_input, vol_slider,len_slider,paraDelay,delay_slider1
 #source = ColumnDataSource({'x0': [], 'y0': [], 'x1': [], 'y1': []})
 sr = p.segment(x0='x0', y0='y0', x1='x1', y1='y1', color='#D2CC1A', alpha=1, line_width=3, source=source, )
     
-cr = p.circle('x', 'y', fill_color='color', size=30, alpha=1, hover_color='#ED553B', hover_alpha=1.0, source=source2)
+cr = p.circle('x', 'y', fill_color='color', size=20, alpha=1, hover_color='#ED553B', hover_alpha=1.0, source=source2)
 glyph = cr.glyph
 glyph.size = 60
 glyph.fill_alpha = 0.8
 glyph.line_color = "#ED553B"
-#glyph.line_dash = [6, 3]
 glyph.line_width = 2
 
-
-
-
 point_attributes = ['x', 'y', 'sx', 'sy'] 
-
 
 code = """
 
@@ -266,7 +255,7 @@ if (dataCercle.state[audioID] == "False" && dataCercle.color[audioID]=='#D2CC1A'
         frequency: lpslider1,
         peak: lpslider2
     });
-    
+    console.log(addr + dataCercle.nameSound[audioID])
     const player = new Pz.Sound(addr + dataCercle.nameSound[audioID], () => {
       player.addEffect(delay);
       player.addEffect(reverb);
@@ -278,7 +267,7 @@ if (dataCercle.state[audioID] == "False" && dataCercle.color[audioID]=='#D2CC1A'
     });
 
     setTimeout(function(){
-        player.pause();
+        player.stop();
     }, lenValue*1000);
 
     }
@@ -296,9 +285,6 @@ source2.change.emit();
 segment.data = data;
 """ % point_attributes
 
-
-#p.js_on_event(events.MouseMove, display_event(div, attributes=point_attributes))
-
 callback = CustomJS(args={'circle': cr.data_source, 'segment': sr.data_source, "div": div,  'source2':source2, 'audioAdresse':audioAdress,
 'len':len_slider,
 'vol_slider':vol_slider,
@@ -313,27 +299,8 @@ callback = CustomJS(args={'circle': cr.data_source, 'segment': sr.data_source, "
 'lp_slider1':lp_slider1,
 'lp_slider2':lp_slider2 }, code=code)
 
-def callback2(event):
-    el = source2.color.index("yellow")
-    print("Indice")
-    print(el)
-    if source2.state[el] == "False":
-        source2.state[el] = "True"
-        play(song)
-        print("YOOO")
-
-        
-#p.on_event(events.MouseMove, callback3)
 p.js_on_event(events.MouseMove, callback)
-#len_slider.js_on_change('value', callback)
 
-
-show(layout)
-#from bokeh.embed import json_item
-#from bokeh.resources import CDN
-#import json
-#item_text = json.dumps(json_item(layout, "myplot"))
-
+#show(layout)
 
 curdoc().add_root(layout)
-
