@@ -32,8 +32,8 @@ random_color = ["#"+''.join([random.choice('0123456789ABCDEF') for j in range(6)
 
 output_file("contrast.html")
 #curdoc().theme = 'contrast'
-curdoc().theme = Theme(filename="myappv2/theme.yaml")
-audioAdress = 'myappv2/static/data/'
+curdoc().theme = Theme(filename="myapp/theme.yaml")
+audioAdress = 'myapp/static/data/'
 win_s = 4096
 hop_s = 512
 tolerance = 0.8
@@ -85,8 +85,8 @@ class SplitWavAudioMubin():
 
                 
 if splitNewSong:
-    audioAdress = 'myappv2/static/split/'
-    split_wav = SplitWavAudioMubin('myappv2/static/', 'drum_sega1.wav', audioAdress)
+    audioAdress = 'myapp/static/split/'
+    split_wav = SplitWavAudioMubin('myapp/static/', 'drum_sega1.wav', audioAdress)
     split_wav.multiple_split_milli(milli_time=200)
     twodtable = [np.array(['Filename', 'Spectral Centroid', 'Root Mean Square'])]
     for segSound in split_wav.arrayName:  
@@ -216,6 +216,7 @@ glyph.line_width = 2
 
 point_tool = PointDrawTool(renderers=[cr])
 p.add_tools(point_tool)
+p.add_tools('lasso_select')
 p.toolbar.active_tap = point_tool
 
 p.xaxis.major_tick_line_color = None  # turn off x-axis major ticks
