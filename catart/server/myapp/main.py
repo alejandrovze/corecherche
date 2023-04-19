@@ -1,7 +1,7 @@
 # myapp.py
 
 from bokeh.layouts import column, row
-from bokeh.models import ColumnDataSource, CustomJS, Slider, Div, Button, Paragraph, PointDrawTool, Select
+from bokeh.models import ColumnDataSource, CustomJS, Slider, Div, Button, Paragraph, PointDrawTool, Select, FreehandDrawTool
 from bokeh.plotting import figure, output_file, show, curdoc
 from bokeh import events
 from bokeh.themes import built_in_themes, Theme
@@ -199,6 +199,7 @@ file_input.on_change('value', upload_song_add)
 
 source2 = ColumnDataSource(data={'x':x, 'y':y, 'color':color, 'state':state, 'nameSound':nameSound, 'fillalpha':fillalpha})
 source = ColumnDataSource({'x0': [], 'y0': [], 'x1': [], 'y1': []})
+source3 = ColumnDataSource(dict(xs=[[0,0]], ys=[[0,0]]))
 
 
 p = figure(width=1050, height=750, title='PyTart (beta)')
@@ -213,6 +214,11 @@ glyph.size = 20
 glyph.fill_alpha = 0.8
 glyph.line_color = "#ED553B"
 glyph.line_width = 2
+
+r = p.multi_line('xs', 'ys', source=source3)
+draw_tool = FreehandDrawTool(renderers=[r])
+p.add_tools(draw_tool)
+p.toolbar.active_drag = draw_tool
 
 point_tool = PointDrawTool(renderers=[cr])
 p.add_tools(point_tool)
