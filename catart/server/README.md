@@ -2,7 +2,7 @@
 
 Requirements:
 
-pip install bokeh pydub librosa aubio ffprobe-python
+pip install bokeh pydub librosa aubio ffprobe-python pynput
 
 only versions python >=3.7,<3.11 are supported.
 

@@ -1,7 +1,7 @@
 # myapp.py
 
 from bokeh.layouts import column, row
-from bokeh.models import ColumnDataSource, CustomJS, Slider, Div, Button, Paragraph, PointDrawTool, Select, FreehandDrawTool
+from bokeh.models import ColumnDataSource, CustomJS, Slider, Div, Button, Paragraph, PointDrawTool, Select, FreehandDrawTool, TextInput
 from bokeh.plotting import figure, output_file, show, curdoc
 from bokeh import events
 from bokeh.themes import built_in_themes, Theme
@@ -13,7 +13,7 @@ import librosa
 import numpy as np
 import math
 import sys
-from aubio import source, pitch
+#from aubio import source, pitch
 import pandas as pd
 import base64
 import io
@@ -22,6 +22,14 @@ import os
 import time
 from sklearn import preprocessing
 import random
+
+import sounddevice as sd
+#import soundfile as sf
+
+from pynput import mouse, keyboard
+
+#from bokeh.events import ValueSubmit
+
 # PLAY WITH A NEW SONG 
 splitNewSong = True
 ######################
@@ -244,7 +252,6 @@ button = Button(label="Button", button_type="success")
 layout = row(p, column(file_input, vol_slider,len_slider, selectX, selectY))
 
 
-
 point_attributes = ['x', 'y', 'sx', 'sy'] 
 
 code = """
@@ -326,7 +333,49 @@ callback = CustomJS(args={'circle': cr.data_source, 'segment': sr.data_source, "
 'vol_slider':vol_slider
 }, code=code)
 
+#def trigger_function(event):
+#    while True:
+#        if keyboard.is_pressed("a"):
+#                print("You pressed 'a'.")
+
+def on_press(key):
+    print("ok")
+            
+def on_release(key):
+        if key.char == 'z':
+            y, sr = librosa.load(audioAdress + source2.data.get('nameSound')[2])
+            print(y)
+            sd.play(y[0:np.int(sr*len_slider.value)], sr)
+            status = sd.wait() 
+        if key.char == 'q':
+            y, sr = librosa.load(audioAdress + source2.data.get('nameSound')[3])
+            print(y)
+            sd.play(y[0:np.int(sr*len_slider.value)], sr)
+            status = sd.wait() 
+        if key.char == 's':
+            y, sr = librosa.load(audioAdress + source2.data.get('nameSound')[4])
+            print(y)
+            sd.play(y[0:np.int(sr*len_slider.value)], sr)
+            status = sd.wait() 
+        if key.char == 'd':
+            y, sr = librosa.load(audioAdress + source2.data.get('nameSound')[5])
+            print(y)
+            sd.play(y[0:np.int(sr*len_slider.value)], sr)
+            status = sd.wait() 
+        if key == keyboard.Key.esc:
+            # Stop listener
+            return False
+
+        
+listener = keyboard.Listener(
+    on_press=on_press,
+    on_release=on_release)
+listener.start()
+
+            
 p.js_on_event(events.MouseMove, callback)
+#p.on_event(events.MouseEnter, trigger_function)
+
 def modify_carto_X(valueX):
     if valueX == "Spectral Centroid":
         x = feature_table[:, 1]
