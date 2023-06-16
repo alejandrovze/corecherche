@@ -1,0 +1,46 @@
+Piezzo Trigger Ableton Live Set
+with Max 4 Live
+
+--------------
+
+Notes from 23 / 5 / 2023
+Alejandro Van Zandt-Escobar
+
+--------------
+
+
+--------------PLAYERS: TRACKS FOR SAMPLE RECORDING AND PLAYBACK
+
+Sample Player N
+Needs "Pong0GainWatcher" M4L Device
+Set "track identifier" to the number of the track (to be automated in the future)
+Default setup: three tracks, 0, 1, 2
+
+This patch checks that the signal is at a sufficient level before triggering recording. 
+
+Can set the external input to be different or the same for each track (default here they are all set to input 1, with the idea of a common sample to be processed differently on each of the three tracks).
+
+--------------TRIGGERS: TRACKS FOR SAMPLE TRIGGERING
+
+Trigger Input N
+Each needs Audio2MidiTrigger M4L Device
+
+Set the external input according to which input you want to trigger the corresponding Sample player track. (e.g. here inputs 2, 3, 4 will trigger tracks 0, 1, 2). 
+
+
+
+--------------RECORD - SWITCHBOX
+Determines which key presses are translated to recording which track. 
+Currently set up for up to four different tracks. 
+
+Purple "trigger note" chooses input note. (Use panel on right to press keys and find out which note it corresponds to).
+
+Red "triggered channel" corresponds to the channel to be triggered for recording.
+
+By default, note "65" (keyboard "F") will trigger recording on tracks 0, 1 and 2. 
+
+--------------ROUTERS
+One router for each N sample player tracks
+Set the track identifier to track that it controls. 
+
+Possible to change pitch shift level to automate pitch shift changes with different amplitude.
